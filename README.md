@@ -2,7 +2,7 @@
 
 A kid-friendly memory matching game (Concentration-style) built for tablets and phones. Flip two cards, find the matching pair, and clear the board — no timers, no penalties, just fun.
 
-Play it at: **https://frankcyberfella.github.io/MiaMemory/**
+Play it at: **https://frankcyberfella.github.io/miamemory/**
 
 ## Features
 
