@@ -392,7 +392,10 @@
         <button data-difficulty="medium">Medium</button>
         <button data-difficulty="hard">Hard</button>
       </div>
-      <button class="new-game-btn" id="newGameBtn">🔀 New Game</button>
+      <div class="control-group">
+        <button class="new-game-btn" id="newGameBtn">🔀 New Game</button>
+        <button type="button" id="muteBtn" aria-label="Mute sound" title="Mute sound">🔊</button>
+      </div>
     </div>
 
     <div class="family-panel" id="familyPanel" hidden>
@@ -479,6 +482,7 @@
   const familyAddBtn = document.getElementById('familyAddBtn');
   const familyHint = document.getElementById('familyHint');
   const familyPhotoInput = document.getElementById('familyPhotoInput');
+  const muteBtn = document.getElementById('muteBtn');
 
   let currentTheme = 'animals';
   let currentDifficulty = 'easy';
@@ -488,6 +492,7 @@
   let pairsFound = 0;
   let totalPairs = 0;
   let audioCtx = null;
+  let audioEnabled = localStorage.getItem('memoryMatch.audioEnabled') !== 'false';
 
   function shuffle(array) {
     const a = array.slice();
@@ -510,6 +515,7 @@
   }
 
   function playTones(freqs, duration = 0.18, gap = 0.09, type = 'sine', peakGain = 0.25) {
+    if (!audioEnabled) return;
     const ctx = ensureAudio();
     if (!ctx) return;
     freqs.forEach((freq, i) => {
@@ -733,6 +739,26 @@
 
   newGameBtn.addEventListener('click', startGame);
   playAgainBtn.addEventListener('click', startGame);
+
+  function updateMuteButton() {
+    muteBtn.textContent = audioEnabled ? '🔊' : '🔇';
+    muteBtn.classList.toggle('active', !audioEnabled);
+    const label = audioEnabled ? 'Mute sound' : 'Unmute sound';
+    muteBtn.setAttribute('aria-label', label);
+    muteBtn.title = label;
+  }
+
+  muteBtn.addEventListener('click', () => {
+    audioEnabled = !audioEnabled;
+    try {
+      localStorage.setItem('memoryMatch.audioEnabled', String(audioEnabled));
+    } catch {
+      // storage unavailable — preference just won't persist across reloads
+    }
+    updateMuteButton();
+  });
+
+  updateMuteButton();
 
   familyAddBtn.addEventListener('click', () => familyPhotoInput.click());
 
