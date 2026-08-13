@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>Memory Match</title>
+<title>Mia's Memory Game</title>
 <meta name="theme-color" content="#7b2ff7">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Memory Match">
+<meta name="apple-mobile-web-app-title" content="Mia's Memory Game">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" href="icons/icon-192.png">
@@ -47,7 +47,7 @@
 
   .app {
     width: 100%;
-    max-width: 640px;
+    max-width: 760px;
     padding: 14px 14px 24px;
     display: flex;
     flex-direction: column;
@@ -128,11 +128,106 @@
     display: grid;
     gap: 10px;
     width: 100%;
-    max-width: 560px;
+    max-width: 680px;
   }
 
   .board.cols-3 { grid-template-columns: repeat(3, 1fr); }
   .board.cols-4 { grid-template-columns: repeat(4, 1fr); }
+
+  .board-empty {
+    color: #fff;
+    text-align: center;
+    font-size: 1.05rem;
+    font-weight: 600;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    padding: 30px 16px;
+  }
+
+  .family-panel {
+    width: 100%;
+    max-width: 560px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .family-panel[hidden] {
+    display: none;
+  }
+
+  .family-thumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+
+  .family-thumb {
+    position: relative;
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  }
+
+  .family-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .family-thumb button,
+  .family-thumb a {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: none;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    font-weight: 800;
+    line-height: 20px;
+    text-align: center;
+    padding: 0;
+    cursor: pointer;
+  }
+
+  .family-thumb button {
+    top: -4px;
+    right: -4px;
+    background: var(--card-back-2);
+    color: #fff;
+  }
+
+  .family-thumb a {
+    bottom: -4px;
+    left: -4px;
+    background: var(--teal);
+    color: #05332d;
+    text-decoration: none;
+  }
+
+  .family-add-btn {
+    border: none;
+    border-radius: 999px;
+    padding: 8px 16px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    background: rgba(255,255,255,0.85);
+    color: #4a2e8a;
+    cursor: pointer;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.15);
+  }
+
+  .family-hint {
+    color: #fff;
+    font-size: 0.85rem;
+    text-align: center;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  }
 
   .card {
     aspect-ratio: 1 / 1;
@@ -168,11 +263,20 @@
     inset: 0;
     backface-visibility: hidden;
     border-radius: 18%;
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: clamp(1.8rem, 8vw, 3rem);
+    font-size: clamp(2rem, 9vw, 4.5rem);
     box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  }
+
+  .card-front img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: saturate(1.25) contrast(1.1) brightness(1.06);
   }
 
   .card-back {
@@ -268,7 +372,7 @@
 <body>
   <div class="app">
     <header>
-      <h1>🧠 Memory Match</h1>
+      <h1>🧠 Mia's Memory Game</h1>
       <div class="stats">
         <span id="pairsFound">0</span> / <span id="totalPairs">3</span> pairs
         <div class="stars" id="starsRow"></div>
@@ -280,6 +384,8 @@
         <button data-theme="animals" class="active">🐶 Animals</button>
         <button data-theme="food">🍎 Food</button>
         <button data-theme="vehicles">🚗 Vehicles</button>
+        <button data-theme="people">🧑 People</button>
+        <button data-theme="family">👪 Family</button>
       </div>
       <div class="control-group" id="difficultyButtons">
         <button data-difficulty="easy" class="active">Easy</button>
@@ -287,6 +393,15 @@
         <button data-difficulty="hard">Hard</button>
       </div>
       <button class="new-game-btn" id="newGameBtn">🔀 New Game</button>
+    </div>
+
+    <div class="family-panel" id="familyPanel" hidden>
+      <div class="family-thumbs" id="familyThumbs"></div>
+      <div class="family-actions">
+        <button type="button" class="family-add-btn" id="familyAddBtn">➕ Add Photos</button>
+      </div>
+      <div class="family-hint" id="familyHint"></div>
+      <input type="file" id="familyPhotoInput" accept="image/*" multiple hidden>
     </div>
 
     <div class="board" id="board"></div>
@@ -302,13 +417,46 @@
 
   <div id="confetti-layer"></div>
 
+<script src="family-photos-manifest.js"></script>
 <script>
 (() => {
   const THEMES = {
     animals: ['🐶','🐱','🐻','🐰','🦁','🐸','🐵','🦊','🐷','🐮','🐔','🐨','🦋','🐢','🐬','🦄'],
     food:    ['🍎','🍌','🍇','🍓','🍉','🍕','🍦','🍩','🍪','🥕','🍒','🍭','🧁','🍋','🍊','🥝'],
-    vehicles:['🚗','🚒','🚌','🚓','✈️','🚀','🚲','🚜','🚂','🛵','⛵','🚁','🚚','🏎️','🚑','🛺']
+    vehicles:['🚗','🚒','🚌','🚓','✈️','🚀','🚲','🚜','🚂','🛵','⛵','🚁','🚚','🏎️','🚑','🛺'],
+    people:  ['👶','🧒','👦','👧','🧑','👨','👩','🧓','👴','👵','🧑‍🚀','👮','👩‍⚕️','🧑‍🍳','🧑‍🎨','🦸'],
+    family:  []
   };
+
+  const BUNDLED_FAMILY_PHOTOS = (typeof FAMILY_PHOTO_FILES !== 'undefined' ? FAMILY_PHOTO_FILES : [])
+    .map(name => 'family-photos/' + name);
+
+  const FAMILY_STORAGE_KEY = 'memoryMatch.familyPhotos';
+
+  function loadFamilyPhotos() {
+    try {
+      const raw = localStorage.getItem(FAMILY_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function saveFamilyPhotos() {
+    try {
+      localStorage.setItem(FAMILY_STORAGE_KEY, JSON.stringify(uploadedFamilyPhotos));
+    } catch {
+      // storage full or unavailable — photos still work for this session
+    }
+  }
+
+  let uploadedFamilyPhotos = loadFamilyPhotos();
+
+  function refreshFamilyTheme() {
+    THEMES.family = [...BUNDLED_FAMILY_PHOTOS, ...uploadedFamilyPhotos];
+  }
+
+  refreshFamilyTheme();
 
   const DIFFICULTY = {
     easy:   { pairs: 3, cols: 3 },
@@ -326,6 +474,11 @@
   const newGameBtn = document.getElementById('newGameBtn');
   const playAgainBtn = document.getElementById('playAgainBtn');
   const confettiLayer = document.getElementById('confetti-layer');
+  const familyPanel = document.getElementById('familyPanel');
+  const familyThumbs = document.getElementById('familyThumbs');
+  const familyAddBtn = document.getElementById('familyAddBtn');
+  const familyHint = document.getElementById('familyHint');
+  const familyPhotoInput = document.getElementById('familyPhotoInput');
 
   let currentTheme = 'animals';
   let currentDifficulty = 'easy';
@@ -375,10 +528,69 @@
   function playMatchSound() { playTones([523.25, 659.25, 783.99]); }
   function playWinSound() { playTones([523.25, 659.25, 783.99, 1046.5], 0.22, 0.11); }
 
+  function pickSymbols(theme, pairCount) {
+    const pool = THEMES[theme];
+    if (!pool.length) return [];
+    if (pool.length >= pairCount) return shuffle(pool).slice(0, pairCount);
+    // not enough unique symbols (e.g. a few family photos): repeat to fill the board
+    const shuffledPool = shuffle(pool);
+    const result = [];
+    for (let i = 0; i < pairCount; i++) result.push(shuffledPool[i % shuffledPool.length]);
+    return result;
+  }
+
   function buildDeck(theme, pairCount) {
-    const symbols = shuffle(THEMES[theme]).slice(0, pairCount);
+    const symbols = pickSymbols(theme, pairCount);
     const doubled = shuffle([...symbols, ...symbols]);
     return doubled.map((symbol, i) => ({ id: i, symbol, matched: false }));
+  }
+
+  function resizeImage(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = reject;
+      reader.onload = () => {
+        const img = new Image();
+        img.onerror = reject;
+        img.onload = () => {
+          const size = 320;
+          const canvas = document.createElement('canvas');
+          canvas.width = size;
+          canvas.height = size;
+          const ctx = canvas.getContext('2d');
+          const scale = Math.max(size / img.width, size / img.height);
+          const w = img.width * scale, h = img.height * scale;
+          ctx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h);
+          resolve(canvas.toDataURL('image/jpeg', 0.82));
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function isImageSymbol(symbol) {
+    return symbol.startsWith('data:image') || /\.(png|jpe?g|webp|gif)$/i.test(symbol);
+  }
+
+  function renderFamilyPanel() {
+    familyPanel.hidden = currentTheme !== 'family';
+    if (currentTheme !== 'family') return;
+
+    familyThumbs.innerHTML = uploadedFamilyPhotos.map((src, i) => `
+      <div class="family-thumb">
+        <img src="${src}" alt="">
+        <a href="${src}" download="family-photo-${i + 1}.jpg" aria-label="Save photo" title="Save photo">⬇</a>
+        <button type="button" data-remove="${i}" aria-label="Remove photo">×</button>
+      </div>
+    `).join('');
+
+    const builtInNote = BUNDLED_FAMILY_PHOTOS.length
+      ? `${BUNDLED_FAMILY_PHOTOS.length} built-in photo${BUNDLED_FAMILY_PHOTOS.length === 1 ? '' : 's'} already in the game. `
+      : '';
+    familyHint.textContent = uploadedFamilyPhotos.length === 0
+      ? `${builtInNote}Add your own photos below to mix in more!`
+      : `${builtInNote}${uploadedFamilyPhotos.length} you added — tap ⬇ on a photo to save it if you want it made permanent.`;
   }
 
   function renderStars() {
@@ -398,10 +610,13 @@
       const cardEl = document.createElement('div');
       cardEl.className = 'card';
       cardEl.dataset.index = index;
+      const front = isImageSymbol(card.symbol)
+        ? `<img src="${card.symbol}" alt="">`
+        : card.symbol;
       cardEl.innerHTML = `
         <div class="card-inner">
           <div class="card-face card-back"></div>
-          <div class="card-face card-front">${card.symbol}</div>
+          <div class="card-face card-front">${front}</div>
         </div>
       `;
       cardEl.addEventListener('click', () => onCardClick(index));
@@ -473,11 +688,21 @@
   function startGame() {
     winOverlay.classList.remove('show');
     confettiLayer.innerHTML = '';
+    renderFamilyPanel();
     const { pairs } = DIFFICULTY[currentDifficulty];
     totalPairs = pairs;
     pairsFound = 0;
     flippedIndices = [];
     lockBoard = false;
+
+    if (currentTheme === 'family' && THEMES.family.length === 0) {
+      deck = [];
+      updateStats();
+      boardEl.className = 'board';
+      boardEl.innerHTML = '<div class="board-empty">👪 Add some family photos above to start playing!</div>';
+      return;
+    }
+
     deck = buildDeck(currentTheme, pairs);
     updateStats();
     renderBoard();
@@ -501,6 +726,28 @@
 
   newGameBtn.addEventListener('click', startGame);
   playAgainBtn.addEventListener('click', startGame);
+
+  familyAddBtn.addEventListener('click', () => familyPhotoInput.click());
+
+  familyPhotoInput.addEventListener('change', async () => {
+    const files = [...familyPhotoInput.files];
+    familyPhotoInput.value = '';
+    if (!files.length) return;
+    const resized = await Promise.all(files.map(f => resizeImage(f).catch(() => null)));
+    resized.filter(Boolean).forEach(dataUrl => uploadedFamilyPhotos.push(dataUrl));
+    saveFamilyPhotos();
+    refreshFamilyTheme();
+    startGame();
+  });
+
+  familyThumbs.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-remove]');
+    if (!btn) return;
+    uploadedFamilyPhotos.splice(Number(btn.dataset.remove), 1);
+    saveFamilyPhotos();
+    refreshFamilyTheme();
+    startGame();
+  });
 
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {

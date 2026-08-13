@@ -1,11 +1,15 @@
-const CACHE_NAME = 'memory-match-v1';
+importScripts('family-photos-manifest.js');
+
+const CACHE_NAME = 'memory-match-v11';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
+  './family-photos-manifest.js',
   './icons/icon-192.png',
   './icons/icon-512.png',
-  './icons/apple-touch-icon.png'
+  './icons/apple-touch-icon.png',
+  ...(typeof FAMILY_PHOTO_FILES !== 'undefined' ? FAMILY_PHOTO_FILES.map(f => './family-photos/' + f) : [])
 ];
 
 self.addEventListener('install', event => {

@@ -1,6 +1,6 @@
 {
-  "name": "Memory Match",
-  "short_name": "Memory Match",
+  "name": "Mia's Memory Game",
+  "short_name": "Mia's Memory",
   "description": "A kid-friendly memory matching game for tablets and phones",
   "start_url": "./index.html",
   "scope": "./",
