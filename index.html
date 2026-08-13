@@ -134,6 +134,14 @@
   .board.cols-3 { grid-template-columns: repeat(3, 1fr); }
   .board.cols-4 { grid-template-columns: repeat(4, 1fr); }
 
+  @media (max-width: 480px) {
+    .board.cols-4 {
+      max-width: 340px;
+      gap: 8px;
+      margin: 0 auto;
+    }
+  }
+
   .board-empty {
     color: #fff;
     text-align: center;
