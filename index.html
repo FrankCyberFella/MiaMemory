@@ -67,6 +67,15 @@
     letter-spacing: 0.5px;
   }
 
+  .header-icon {
+    height: 1.15em;
+    width: 1.15em;
+    object-fit: cover;
+    border-radius: 22%;
+    vertical-align: -0.2em;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  }
+
   .stats {
     font-size: clamp(1rem, 4vw, 1.3rem);
     font-weight: 600;
@@ -380,7 +389,7 @@
 <body>
   <div class="app">
     <header>
-      <h1>🧠 Mia's Memory Game</h1>
+      <h1><img src="icons/icon-192.png" alt="" class="header-icon"> Mia's Memory Game</h1>
       <div class="stats">
         <span id="pairsFound">0</span> / <span id="totalPairs">3</span> pairs
         <div class="stars" id="starsRow"></div>
