@@ -506,17 +506,17 @@
     return audioCtx;
   }
 
-  function playTones(freqs, duration = 0.18, gap = 0.09) {
+  function playTones(freqs, duration = 0.18, gap = 0.09, type = 'sine', peakGain = 0.25) {
     const ctx = ensureAudio();
     if (!ctx) return;
     freqs.forEach((freq, i) => {
       const osc = ctx.createOscillator();
       const gainNode = ctx.createGain();
-      osc.type = 'sine';
+      osc.type = type;
       osc.frequency.value = freq;
       const start = ctx.currentTime + i * gap;
       gainNode.gain.setValueAtTime(0.0001, start);
-      gainNode.gain.exponentialRampToValueAtTime(0.25, start + 0.02);
+      gainNode.gain.exponentialRampToValueAtTime(peakGain, start + 0.02);
       gainNode.gain.exponentialRampToValueAtTime(0.0001, start + duration);
       osc.connect(gainNode);
       gainNode.connect(ctx.destination);
@@ -525,6 +525,8 @@
     });
   }
 
+  function playFlipSound() { playTones([550], 0.07, 0, 'triangle', 0.15); }
+  function playMismatchSound() { playTones([349.23, 293.66], 0.16, 0.11, 'sine', 0.18); }
   function playMatchSound() { playTones([523.25, 659.25, 783.99]); }
   function playWinSound() { playTones([523.25, 659.25, 783.99, 1046.5], 0.22, 0.11); }
 
@@ -630,6 +632,7 @@
     if (cardEl.classList.contains('flipped') || cardEl.classList.contains('matched')) return;
 
     cardEl.classList.add('flipped');
+    playFlipSound();
     flippedIndices.push(index);
 
     if (flippedIndices.length === 2) {
@@ -656,6 +659,7 @@
         setTimeout(winGame, 500);
       }
     } else {
+      playMismatchSound();
       setTimeout(() => {
         el1.classList.remove('flipped');
         el2.classList.remove('flipped');
