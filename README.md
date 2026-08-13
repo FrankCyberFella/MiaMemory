@@ -1,4 +1,4 @@
-# Memory Match
+# MiaMemory
 
 A kid-friendly memory matching game (Concentration-style) built for tablets and phones. Flip two cards, find the matching pair, and clear the board — no timers, no penalties, just fun.
 
@@ -6,7 +6,7 @@ Play it at: **https://frankcyberfella.github.io/memory-match-game/**
 
 ## Features
 
-- Three themes: Animals 🐶, Food 🍎, Vehicles 🚗 (all emoji, no image assets needed)
+- Five themes: Animals 🐶, Food 🍎, Vehicles 🚗, People 🧑 (all emoji), and Family 👪 (real photos — bundled ones in `family-photos/`, plus photos you add from your own device)
 - Three difficulty levels: Easy (3 pairs), Medium (6 pairs), Hard (8 pairs)
 - Big tap targets, bright colors, gentle flip animation
 - Star tracker and confetti celebration on a win

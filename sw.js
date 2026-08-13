@@ -1,6 +1,6 @@
 importScripts('family-photos-manifest.js');
 
-const CACHE_NAME = 'memory-match-v11';
+const CACHE_NAME = 'memory-match-v12';
 const ASSETS = [
   './',
   './index.html',
